@@ -1,0 +1,24 @@
+version: '3'
+services:
+  postgres:
+    image: kartoza/postgis:15-3.3
+    hostname: postgres
+    ports:
+      - 5432:5432
+    container_name: bounds-db
+    env_file:
+      - .env
+  server:
+    build: .
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/app
+    container_name: bounds-api
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      WAIT_HOSTS: postgres:5432
+    env_file:
+      - .env
