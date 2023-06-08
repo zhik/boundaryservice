@@ -4,6 +4,11 @@ import urllib.request
 from urllib.parse import urlparse
 import os
 import shutil
+from dotenv import load_dotenv
+from sqlalchemy import text
+import sqlalchemy as sa
+
+load_dotenv()  # for testing
 
 
 def remove_files_in_folder(folder_path):
@@ -20,8 +25,26 @@ def read_dataset(dataset):
     # clean up
     return df
 
+def create_read_user(engine, DBNAME):
+    # Create a ready only user
+    query = f"""
+    DROP USER IF EXISTS read;
+
+    CREATE USER read WITH PASSWORD 'read';
+    GRANT USAGE ON SCHEMA public TO read;
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO read;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO read;
+
+    """
+    print('creating user "read"')
+    with engine.connect() as con:
+        con.execute(text(query))
+    return sa.create_engine(f"postgresql://read:read@postgres:5432/{DBNAME}")
 
 def setup(engine, datasets):
+    if not os.path.exists('./tmp'):
+        os.makedirs('./tmp')
+
     # setup database if items don't exist
     for dataset in datasets:
         query = f"""SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{dataset["name"]}')"""

@@ -3,7 +3,7 @@ FROM python:3.8.17-slim
 WORKDIR /app
 
 RUN apt update
-RUN apt-get install -y libgdal-dev gcc postgresql-client python3-dev --no-install-recommends && \
+RUN apt-get install -y libgdal-dev postgresql-client python3-dev --no-install-recommends && \
     apt-get clean -y
 
 COPY ./requirements.txt /app/requirements.txt

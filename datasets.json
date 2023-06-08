@@ -2,6 +2,13 @@
     {
         "name": "nycc_23b",
         "source": "https://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/NYC_City_Council_Districts_Water_Included/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=pgeojson",
-        "file_name": "nycc_23b.geojson"
+        "file_name": "nycc_23b.geojson",
+        "columns": ["CounDist"]
+    },
+    {
+        "name": "nysd_23b",
+        "source": "https://services5.arcgis.com/GfwWNkhOj9bNBqoJ/ArcGIS/rest/services/NYC_School_Districts/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=pgeojson",
+        "file_name": "nysd_23b.geojson",
+        "columns": ["SchoolDist"]
     }
 ]
