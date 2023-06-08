@@ -1,16 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>boundary service</title>
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <style>
+      #map {
+        height: 50lvh;
+        width: 80lvw;
+        margin: 1rem auto;
+      }
+      pre span{
+        font-size: large;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Available layers</h3>
     <ul>
-    {% for name in table_names %}
-        <li>{{ name }}</li>
-    {% endfor %}
+      {% for name in table_names %}
+      <li>
+        <a href="/query?lat=40.724&lng=-73.9829&bound={{ name }}">{{ name }}</a>
+      </li>
+      {% endfor %}
     </ul>
-</body>
+    <h2>api example</h2>
+    <pre>/query?<span style="color:#cf3239;">lat=40.724</span>&<span style="color:#77983d">lng=-73.9829</span>&<span style="color: #1b538d;">bound=nycc_23b</span></pre>
+    <h3>map example</h3>
+    <div id="map"></div>
+    <p id="result">click on a point on the map to see the json returns</p>
+    <script>
+      const resultDOM = document.getElementById('result')
+      const map = L.map("map").setView([40.724, -73.9829], 13);
+
+      let marker = L.marker([51.5, -0.09]).addTo(map);
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      map.on("click", function (e) {
+        map.removeLayer(marker);
+        const { lat, lng } = e.latlng;
+        marker = L.marker([lat, lng]).addTo(map);
+
+        // prettier-ignore
+        const layers = {{ table_names | tojson }}
+
+        Promise.all(
+            layers.map(layer => fetch(`/query?lat=${lat}&lng=${lng}&bound=${layer}`)
+            .then(res => res.json()))
+        ).then(d => resultDOM.innerText = JSON.stringify(d))
+      });
+    </script>
+  </body>
 </html>
